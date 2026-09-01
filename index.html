@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>产品筛选 Demo</title>
+  <link rel="stylesheet" href="./vendor/element-ui.css">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main id="filterPage" class="page">
+    <section class="panel">
+      <div class="toolbar">
+        <input id="nameKeyword" placeholder="请输入产品名称/产品代码">
+        <input id="managerKeyword" placeholder="请输入产品管理人">
+        <input id="endDate" type="date" value="2026-08-14">
+        <button class="button" onclick="queryFunds()">⌕ 查询</button>
+        <button class="button secondary" onclick="resetFilters()">↻ 重置</button>
+        <button class="button" onclick="toggleFilters()" id="toggleButton">收起筛选 ▲</button>
+        <button class="button secondary export" onclick="exportFunds()">⇩ 导出Excel</button>
+      </div>
+      <div id="filterBody" class="filters">
+        <div class="filter-line source-row"><span class="label">数据来源：</span><span class="option active" data-source="托管部自有数据">托管部自有数据</span><span class="option active" data-source="火富牛">火富牛</span><span class="option active" data-source="机构部">机构部</span><span class="option active" data-source="美市数据源">美市数据源</span></div>
+        <div id="strategyRows"></div>
+        <div class="filter-line"><span class="label">评价指标：</span><span class="option">单位净值</span><span class="option">累计净值</span><span class="option active">资产净值</span><span class="option active">收益率</span><span class="option active">最大回撤</span><span class="option">Sharpe比率</span><span class="option">Treynor比率</span><span class="option">Alpha</span></div>
+        <div class="range"><b>计算区间：</b><span class="option">近六月</span><span class="option">近一年</span><span class="option">今年以来</span><span class="option active">成立以来</span></div>
+        <div class="filter-line"><span class="label">更多指标：</span><span class="option">成立时间</span><span class="option active">运行状态</span><span class="option">是否代销</span></div>
+      </div>
+      <div class="table-tools"></div><div id="selectedTags" class="selected-row"></div>
+      <div class="table-wrap"><table><thead><tr><th>序号</th><th>产品代码</th><th>产品名称</th><th>数据来源</th><th>投资策略</th><th>产品管理人</th><th>成立日期</th><th>净值日期</th><th>单位净值</th><th>累计净值</th><th>近一月收益率</th><th>近一月最大回撤</th><th>近一月Sharpe比率</th></tr></thead><tbody id="fundRows"></tbody></table></div>
+      <div id="staticPager" class="pager">
+        <el-pagination
+          background
+          layout="prev, pager, next, total"
+          :current-page="currentPage"
+          :page-size="pageSize"
+          :total="total"
+          @current-change="changePage"
+        ></el-pagination>
+      </div>
+    </section>
+  </main>
+
+  <main id="reportPage" class="report">
+    <button class="button secondary back" onclick="showFilterPage()">‹ 返回筛选</button>
+    <article class="paper">
+      <header>
+        <div class="report-summary"><div class="report-title"><span>▧</span><span id="reportName">XXX稳健增长1号</span></div><div class="basic-grid"><span>成立日期：2019-06-18</span><span>基金经理：XXX</span><span>投资顾问：XXX</span><span>基金管理人：XXX资产管理有限公司</span><span>办公地：上海</span><span>策略分类：股票策略</span><span>备案编号：XXX-0001</span><span>运行状态：运作中</span><span>数据来源：托管部自有数据</span></div></div>
+        <div class="kpis"><div class="kpi"><strong>2026-08-14</strong><span>最新净值日期</span></div><div class="kpi"><strong>1.4370</strong><span>单位净值</span></div><div class="kpi"><strong>1.9930</strong><span>累计净值</span></div><div class="kpi"><strong>8.62%</strong><span>近三月收益率</span></div><div class="kpi"><strong>12.45%</strong><span>今年以来收益率</span></div><div class="kpi"><strong>18.36%</strong><span>近一年收益率</span></div><div class="kpi negative"><strong>-6.55%</strong><span>成立以来最大回撤</span></div><div class="kpi"><strong>1.28</strong><span>成立以来Sharpe比率</span></div></div>
+        <div class="report-query"><label>统计周期：<select><option>近一年</option><option>近三年</option><option>成立以来</option></select></label><label>统计区间：<input value="2025-08-15 至 2026-08-14" readonly></label><button class="button" onclick="notify('已按当前条件展示静态报告数据')">查询</button><button class="button" onclick="notify('已重置为默认测试条件')">重置</button><button class="button" onclick="exportReport()">导出</button></div>
+      </header>
+      <section class="section"><h2 class="section-title">产品基本信息</h2><h3>产品基本信息</h3><table class="info-table"><thead><tr><th>产品代码</th><th>产品名称</th><th>成立日期</th><th>管理人</th><th>投资经理</th><th>数据来源</th></tr></thead><tbody><tr><td>XXX0001</td><td>XXX稳健增长1号</td><td>2019-06-18</td><td>XXX资产管理有限公司</td><td>XXX</td><td>托管部自有数据</td></tr></tbody></table></section>
+      <section class="section"><h2 class="section-title">净值走势图 - 周频</h2><h3>净值走势图 - 周频</h3><div class="legend"><i class="dot blue"></i>单位净值<i class="dot purple"></i>累计单位净值<i class="dot yellow"></i>复权累计净值<i class="dot orange"></i>沪深300指数</div><div class="chart"><svg viewBox="0 0 1000 260" preserveAspectRatio="none"><g><line class="grid-line" x1="55" y1="30" x2="960" y2="30"/><line class="grid-line" x1="55" y1="75" x2="960" y2="75"/><line class="grid-line" x1="55" y1="120" x2="960" y2="120"/><line class="grid-line" x1="55" y1="165" x2="960" y2="165"/><line class="grid-line" x1="55" y1="210" x2="960" y2="210"/></g><polyline class="series" stroke="#1487c9" points="55,55 210,61 365,71 520,89 675,107 830,125 960,142"/><polyline class="series" stroke="#7c68b7" points="55,50 210,55 365,67 520,86 675,105 830,122 960,137"/><polyline class="series" stroke="#f4ba39" points="55,52 210,72 365,83 520,64 675,77 830,106 960,149"/><polyline class="series" stroke="#fb8351" points="55,54 210,76 365,88 520,69 675,90 830,118 960,158"/></svg></div><p class="note">注：净值与指数均已归一化处理。</p></section>
+      <section class="section"><h2 class="section-title">收益率状况 - 周频</h2><h3>收益率状况 - 周频</h3><div class="return-chart"><div class="return-axis"><span>4%</span><span>2%</span><span>0%</span><span>-2%</span><span>-4%</span></div><div class="return-bars"><div class="bar-unit"><i class="bar" style="height:60px"></i><span class="bar-label">01-09</span></div><div class="bar-unit"><i class="bar" style="height:44px"></i><span class="bar-label">02-06</span></div><div class="bar-unit"><i class="bar" style="height:58px"></i><span class="bar-label">03-06</span></div><div class="bar-unit"><i class="bar" style="height:12px"></i><span class="bar-label">04-03</span></div><div class="bar-unit"><i class="bar" style="height:56px"></i><span class="bar-label">05-08</span></div></div></div><p class="note">注：组合区间最高周收益率为 3.6105%，最低周收益率为 -2.8877%。</p><h3>组合周收益率分布</h3><table class="report-table"><thead><tr><th>最大值</th><th>最小值</th><th>平均值</th><th>标准差</th><th>偏度</th><th>峰度</th><th>25%分位数</th><th>中位数</th><th>75%分位数</th></tr></thead><tbody><tr><td>3.6105%</td><td>-2.8877%</td><td>-0.7429%</td><td>2.9824%</td><td>0.84</td><td>-1.35</td><td>-2.6217%</td><td>-1.8473%</td><td>0.3105%</td></tr></tbody></table><div class="distribution"><i style="height:85%"></i><i style="height:65%"></i><i style="height:30%"></i><i style="height:45%"></i><i style="height:72%"></i><i style="height:22%"></i><i style="height:40%"></i></div></section>
+      <section class="section"><h2 class="section-title">最大回撤及盈亏占比（复权）- 周频</h2><h3>最大回撤及盈亏占比（复权）- 周频</h3><div class="drawdown-grid"><div class="drawdown-card"><div class="drawdown-bars"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="legend" style="text-align:center"><i class="dot blue"></i>组合</div></div><div class="drawdown-card"><div class="donut"></div><div class="legend" style="text-align:center"><i class="dot blue"></i>盈利周<i class="dot" style="background:#fa1748"></i>亏损周</div></div></div><table class="report-table" style="margin-top:18px"><thead><tr><th>期间</th><th>项目</th><th>最大回撤（%）</th><th>最大回撤期间</th><th>修复天数</th><th>平均周收益（%）</th><th>最大周盈利（%）</th><th>最大周亏损（%）</th><th>盈利周占比（%）</th></tr></thead><tbody><tr><td>报告区间</td><td>组合</td><td>-6.5470</td><td>20260107-20260218</td><td>-</td><td>-0.7429</td><td>3.6105</td><td>-2.8877</td><td>25.0000</td></tr><tr><td>成立以来</td><td>组合</td><td>-6.5470</td><td>20190618-20260218</td><td>67</td><td>0.2003</td><td>25.4858</td><td>-19.1897</td><td>48.2143</td></tr></tbody></table></section>
+      <section class="section"><h2 class="section-title">收益与风险指标 - 周频</h2><h3>收益风险比 - 周频</h3><table class="report-table"><thead><tr><th>指标</th><th>报告区间</th><th>近1月</th><th>近3月</th><th>近6月</th><th>今年以来</th><th>近1年</th><th>近2年</th><th>近3年</th><th>成立以来</th></tr></thead><tbody><tr><td>收益率（%）</td><td>-3.0693</td><td>-3.0693</td><td>-3.0693</td><td>-3.0693</td><td>-3.0693</td><td>-14.1173</td><td>-15.6511</td><td>-15.6511</td><td>18.3600</td></tr><tr><td>年化收益率（%）</td><td>-33.3198</td><td>-33.3198</td><td>-33.3198</td><td>-33.3198</td><td>-33.3198</td><td>-14.1173</td><td>-14.6194</td><td>-14.6194</td><td>12.4500</td></tr><tr><td>年化波动率（%）</td><td>21.5066</td><td>21.5066</td><td>21.5066</td><td>21.5066</td><td>21.5066</td><td>75.5341</td><td>72.8058</td><td>72.8058</td><td>16.8205</td></tr><tr><td>最大回撤（复权）（%）</td><td>-6.5470</td><td>-6.5470</td><td>-6.5470</td><td>-6.5470</td><td>-6.5470</td><td>-6.5470</td><td>-6.5470</td><td>-6.5470</td><td>-6.5470</td></tr><tr><td>夏普指数</td><td>-1.6190</td><td>-1.6190</td><td>-1.6190</td><td>-1.6190</td><td>-1.6190</td><td>-0.2068</td><td>-0.2214</td><td>-0.2214</td><td>1.2800</td></tr></tbody></table><p class="note">注：以上全部为脱敏静态测试数据。</p></section>
+      <footer class="footer">产品筛选 Demo · 周频净值报告 · 脱敏静态数据</footer>
+    </article>
+  </main>
+  <script src="./vendor/vue.js"></script>
+  <script src="./vendor/element-ui.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
+
