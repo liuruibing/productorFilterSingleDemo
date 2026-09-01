@@ -23,4 +23,3 @@ function download(name,text){ const a=document.createElement('a'); a.href=URL.cr
 function showReport(name){ document.getElementById('reportName').textContent=name; document.getElementById('filterPage').style.display='none'; document.getElementById('reportPage').style.display='block'; window.scrollTo(0,0); } function showFilterPage(){ document.getElementById('reportPage').style.display='none'; document.getElementById('filterPage').style.display='block'; } function notify(msg){ window.alert(msg); }
 pagerVm = new Vue({ el:'#staticPager', data:{ currentPage:1, pageSize, total:funds.length }, methods:{ changePage(page){ currentPage=page; this.currentPage=page; renderTable(); } } });
 document.querySelectorAll('.filter-line > .option,.range > .option').forEach(el=>el.onclick=()=>el.classList.toggle('active')); renderAll();
-
